@@ -10,9 +10,8 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      // Proxy API requests to Laravel backend
-      '/janji-temu': 'http://localhost:8000',
-      '/peminjaman': 'http://localhost:8000',
+      // Only proxy API requests (POST, PUT, DELETE) to Laravel backend
+      // GET requests should be handled by React Router for client-side routing
     },
   },
 })

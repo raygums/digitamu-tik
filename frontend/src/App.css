@@ -1,18 +1,1 @@
-/* DigiTamu TIK - Application Styles */
-
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Smooth transitions */
-* {
-  transition: background-color 0.2s ease;
-}
-
-/* Remove any default styling that might cause issues */
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-}
+/* CSS Reset */
