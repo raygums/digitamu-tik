@@ -3,44 +3,29 @@ import logoUpatik from '../assets/logo_upatik.png';
 
 export default function GuestLayout({ children }) {
     return (
-        <div className="min-h-screen flex flex-col bg-[#F5F5F5]">
-            {/* Topographic Background Pattern */}
-            <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none">
-                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <pattern id="topographic" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
-                            <path d="M 0 50 Q 50 0 100 50 T 200 50" fill="none" stroke="#374151" strokeWidth="0.5"/>
-                            <path d="M 0 100 Q 50 50 100 100 T 200 100" fill="none" stroke="#374151" strokeWidth="0.5"/>
-                            <path d="M 0 150 Q 50 100 100 150 T 200 150" fill="none" stroke="#374151" strokeWidth="0.5"/>
-                            <circle cx="100" cy="100" r="30" fill="none" stroke="#374151" strokeWidth="0.5"/>
-                            <circle cx="100" cy="100" r="50" fill="none" stroke="#374151" strokeWidth="0.5"/>
-                            <circle cx="100" cy="100" r="70" fill="none" stroke="#374151" strokeWidth="0.5"/>
-                        </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#topographic)"/>
-                </svg>
-            </div>
-
+        <div className="flex flex-col min-h-screen">
             {/* Header */}
-            <header className="bg-[#4EAEE8] relative z-10">
-                <div className="container mx-auto px-8 py-4">
+            <header className="bg-[#0EA5E9]">
+                <div className="w-full px-8 py-0">
                     <div className="flex justify-between items-center">
                         {/* Left: Unila Logo */}
                         <div className="flex items-center">
-                            <img src={logoUnila} alt="Logo Unila" className="h-14" />
+                            <img src={logoUnila} alt="Logo Unila" className="h-12" />
                         </div>
 
                         {/* Right: UPA TIK Logo */}
                         <div className="flex items-center">
-                            <img src={logoUpatik} alt="Logo UPA TIK" className="h-12" />
+                            <img src={logoUpatik} alt="Logo UPA TIK" className="h-28 w-36" />
                         </div>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="grow container mx-auto px-6 py-8 relative z-10">
-                {children}
+            <main className="grow bg-gray-50">
+                <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {children}
+                </div>
             </main>
 
             {/* Footer */}
@@ -72,7 +57,7 @@ export default function GuestLayout({ children }) {
                             <h3 className="text-sm font-bold mb-3 text-white">Tautan Cepat</h3>
                             <ul className="text-gray-300 text-xs space-y-1">
                                 <li><a href="https://unila.ac.id" className="hover:text-blue-400 transition">Website Unila</a></li>
-                                <li><a href="https://unila.ac.id/tik" className="hover:text-blue-400 transition">Website UPA TIK</a></li>
+                                <li><a href="https://helpdesktik.unila.ac.id/" className="hover:text-blue-400 transition">Website UPA TIK</a></li>
                                 <li><a href="#" className="hover:text-blue-400 transition">Panduan Penggunaan</a></li>
                             </ul>
                         </div>
