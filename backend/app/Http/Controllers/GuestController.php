@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreJanjiTemuRequest;
 use App\Http\Requests\StorePeminjamanRequest;
+use App\Mail\JanjiTemuConfirmation;
+use App\Mail\PeminjamanConfirmation;
 use App\Models\Berkas;
 use App\Models\Kunjungan;
 use App\Models\Peminjaman;
 use App\Models\Tamu;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -53,7 +56,6 @@ class GuestController extends Controller
                 ['email' => $request->email],
                 [
                     'nama' => $request->nama,
-                    'no_telp' => $request->no_telp,
                 ]
             );
 
@@ -61,7 +63,6 @@ class GuestController extends Controller
             if (!$tamu->wasRecentlyCreated) {
                 $tamu->update([
                     'nama' => $request->nama,
-                    'no_telp' => $request->no_telp,
                 ]);
             }
 
@@ -75,17 +76,22 @@ class GuestController extends Controller
                 'status' => 'menunggu',
             ]);
 
+            // Send confirmation email
+            Mail::to($tamu->email)->send(new JanjiTemuConfirmation($kunjungan));
+
             DB::commit();
 
             return response()->json([
-                'message' => 'Janji temu berhasil dibuat! Silakan tunggu konfirmasi dari staff.',
+                'success' => true,
+                'message' => 'Permohonan Berhasil! Bukti formulir telah dikirim ke email Anda.',
                 'data' => $kunjungan
-            ], 201);
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             
             return response()->json([
-                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -121,68 +127,78 @@ class GuestController extends Controller
         try {
             DB::beginTransaction();
 
-            // Find or create tamu based on email
+            // Step A: Find or create guest by email
             $tamu = Tamu::firstOrCreate(
                 ['email' => $request->email],
                 [
                     'nama' => $request->nama,
                     'instansi' => $request->instansi,
+                    'no_telp' => $request->no_telp,
                 ]
             );
 
-            // Update tamu info if email exists but data has changed
+            // Update guest info if email exists but data has changed
             if (!$tamu->wasRecentlyCreated) {
                 $tamu->update([
                     'nama' => $request->nama,
                     'instansi' => $request->instansi,
+                    'no_telp' => $request->no_telp,
                 ]);
             }
 
-            // Create kunjungan for the loan period (using start date as janji temu)
-            $keperluan = "Peminjaman Fasilitas: {$request->fasilitas}\n\nPeriode: {$request->tanggal_mulai} s/d {$request->tanggal_selesai}";
-            if ($request->detail_kebutuhan) {
-                $keperluan .= "\n\nDetail Kebutuhan:\n{$request->detail_kebutuhan}";
-            }
+            // Step B: Create Visit (Kunjungan) with date range
+            $keperluan = "Peminjaman Fasilitas";
 
             $kunjungan = Kunjungan::create([
                 'id_tamu' => $tamu->id,
                 'keperluan' => $keperluan,
-                'waktu_janji_temu' => $request->tanggal_mulai,
+                'waktu_janji_temu' => $request->tanggal_mulai, // Start date from form
+                'waktu_checkout' => $request->tanggal_selesai,  // End date from form
                 'status' => 'menunggu',
             ]);
 
-            // Create peminjaman
+            // Step C: Create Loan (Peminjaman)
             $peminjaman = Peminjaman::create([
                 'id_kunjungan' => $kunjungan->id,
-                'judul_permohonan' => $request->fasilitas,
+                'judul_permohonan' => $request->barang,
                 'detail_kebutuhan' => $request->detail_kebutuhan,
                 'status' => 'diajukan',
             ]);
 
-            // Handle file upload
+            // Step D: Handle File Upload
             if ($request->hasFile('surat_pengantar')) {
                 $file = $request->file('surat_pengantar');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('surat-pengantar', $fileName, 'public');
-
+                
+                // Store file with original name preserved
+                $path = $file->store('uploads/surat_pengantar', 'public');
+                
+                // Create berkas record
                 Berkas::create([
                     'id_peminjaman' => $peminjaman->id,
-                    'nama_file' => $fileName,
-                    'path_file' => $filePath,
+                    'nama_file' => $file->getClientOriginalName(),
+                    'path_file' => $path,
                 ]);
             }
+
+            // Step E: Send Confirmation Email
+            Mail::to($tamu->email)->send(new PeminjamanConfirmation($peminjaman));
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Permohonan peminjaman berhasil diajukan! Silakan tunggu konfirmasi dari staff.',
-                'data' => $peminjaman
-            ], 201);
+                'success' => true,
+                'message' => 'Permohonan Berhasil! Bukti formulir telah dikirim ke email Anda.',
+                'data' => [
+                    'ticket_id' => strtoupper(substr($peminjaman->id, 0, 8)),
+                    'peminjaman' => $peminjaman
+                ]
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             
             return response()->json([
-                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.',
                 'error' => $e->getMessage()
             ], 500);
         }
