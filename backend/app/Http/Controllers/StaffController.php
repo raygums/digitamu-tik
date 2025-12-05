@@ -10,7 +10,6 @@ use App\Mail\StatusKonfirmasi;
 use App\Models\Kunjungan;
 use App\Models\Peminjaman;
 use App\Models\Tamu;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -117,6 +116,8 @@ class StaffController extends Controller
             'message' => 'Staff berhasil dihapus'
         ]);
     }
+
+    /**
      * Get dashboard statistics and recent activities.
      */
     public function dashboard(): JsonResponse
