@@ -18,7 +18,7 @@ return new class extends Migration
         // Create the types
         DB::statement("CREATE TYPE peran_pengguna AS ENUM ('admin', 'staff')");
         DB::statement("CREATE TYPE status_kunjungan AS ENUM ('menunggu', 'disetujui', 'ditolak', 'selesai')");
-        DB::statement("CREATE TYPE status_peminjaman AS ENUM ('diajukan', 'disetujui', 'ditolak', 'selesai')");
+        DB::statement("CREATE TYPE status_peminjaman AS ENUM ('diajukan', 'disetujui', 'dipinjam', 'ditolak', 'selesai')");
     }
 
     /**
